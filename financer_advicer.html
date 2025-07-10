@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Finance Advisor</title>
+    <style>
+        /* Base styles from original */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex; /* Changed to flex for centering login */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%; /* Ensure it takes full width in flex context */
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .nav-tab.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e9ecef;
+        }
+
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        .result {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .advice-box {
+            background: linear-gradient(135deg, #ffc107 0%, #ff8c00 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .advice-box h4 {
+            margin-bottom: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            color: white;
+            border-radius: 10px;
+        }
+
+        .metric h4 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .chat-container {
+            height: 400px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: 15px;
+            max-width: 80%;
+        }
+
+        .user-message {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+        }
+
+        .ai-message {
+            background: white;
+            border: 1px solid #e9ecef;
+            color: #495057;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 20px;
+            margin-right: 10px;
+        }
+
+        .chat-input button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            transition: width 0.5s ease;
+        }
+
+        /* --- New Styles for Login/Register Pages --- */
+        .auth-wrapper {
+            /* This will be the only thing visible initially when not logged in */
+            display: none; /* Controlled by JS, will be 'flex' */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Match body background */
+            justify-content: center;
+            align-items: center;
+            z-index: 1001; /* Ensure it's on top */
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 450px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .auth-card h2 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .auth-card .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .auth-card input[type="text"],
+        .auth-card input[type="password"] {
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .auth-card .btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        .message-area {
+            min-height: 20px; /* Give it some space even when empty */
+            margin-top: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .error-message {
+            color: #dc3545; /* Red for errors */
+        }
+        .success-message {
+            color: #28a745; /* Green for success */
+        }
+        .info-message {
+            color: #007bff; /* Blue for info/loading */
+        }
+
+
+        .auth-card .switch-text {
+            margin-top: 20px;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .auth-card .switch-text a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .auth-card .switch-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Adjust body height for main content when login is hidden */
+        body.app-active {
+            min-height: 100vh;
+            display: block; /* Allow container to take normal flow */
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication Wrapper (Login/Register Forms) -->
+    <div id="authWrapper" class="auth-wrapper">
+        <!-- Login Card -->
+        <div id="loginCard" class="auth-card">
+            <h2>Welcome Back!</h2>
+            <div class="form-group">
+                <label for="loginUsername">Username</label>
+                <input type="text" id="loginUsername" placeholder="Enter your username">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password">
+            </div>
+            <button class="btn" id="loginButton">Login</button>
+            <p id="loginMessage" class="message-area"></p>
+            <p class="switch-text">Don't have an account? <a id="showRegister">Sign Up</a></p>
+        </div>
+
+        <!-- Register Card (Initially hidden) -->
+        <div id="registerCard" class="auth-card" style="display: none;">
+            <h2>Create Your Account</h2>
+            <div class="form-group">
+                <label for="registerUsername">Username</label>
+                <input type="text" id="registerUsername" placeholder="Choose a username">
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">Password</label>
+                <input type="password" id="registerPassword" placeholder="Create a password">
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm your password">
+            </div>
+            <button class="btn" id="registerButton">Register</button>
+            <p id="registerMessage" class="message-area"></p>
+            <p class="switch-text">Already have an account? <a id="showLogin">Login</a></p>
+        </div>
+    </div>
+
+    <!-- Main Application Content (initially hidden) -->
+    <div class="container" id="mainAppContent" style="display: none;">
+        <div class="header">
+            <h1>🤖 AI Finance Advisor</h1>
+            <p>Your Personal Financial Intelligence Assistant</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('budget', this)">Budget Planner</button>
+            <button class="nav-tab" onclick="showTab('investment', this)">Investment Calculator</button>
+            <button class="nav-tab" onclick="showTab('loan', this)">Loan Calculator</button>
+            <button class="nav-tab" onclick="showTab('advisor', this)">AI Advisor Chat</button>
+        </div>
+
+        <div class="content">
+            <!-- Budget Planner Tab -->
+            <div id="budget" class="tab-content active">
+                <div class="card">
+                    <h3>💰 Monthly Budget Planner</h3>
+                    <div class="grid">
+                        <div>
+                            <div class="form-group">
+                                <label>Monthly Income (₹)</label>
+                                <input type="number" id="income" placeholder="Enter your monthly income">
+                            </div>
+                            <div class="form-group">
+                                <label>Housing/Rent (₹)</label>
+                                <input type="number" id="housing" placeholder="Monthly housing costs">
+                            </div>
+                            <div class="form-group">
+                                <label>Food & Groceries (₹)</label>
+                                <input type="number" id="food" placeholder="Monthly food expenses">
+                            </div>
+                            <div class="form-group">
+                                <label>Transportation (₹)</label>
+                                <input type="number" id="transport" placeholder="Monthly transport costs">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group">
+                                <label>Utilities (₹)</label>
+                                <input type="number" id="utilities" placeholder="Monthly utilities">
+                            </div>
+                            <div class="form-group">
+                                <label>Entertainment (₹)</label>
+                                <input type="number" id="entertainment" placeholder="Monthly entertainment">
+                            </div>
+                            <div class="form-group">
+                                <label>Other Expenses (₹)</label>
+                                <input type="number" id="other" placeholder="Other monthly expenses">
+                            </div>
+                            <button class="btn" onclick="calculateBudget()">Analyze Budget</button>
+                        </div>
+                    </div>
+                    <div id="budgetResult"></div>
+                </div>
+            </div>
+
+            <!-- Investment Calculator Tab -->
+            <div id="investment" class="tab-content">
+                <div class="card">
+                    <h3>📈 Investment Growth Calculator</h3>
+                    <div class="grid">
+                        <div>
+                            <div class="form-group">
+                                <label>Initial Investment (₹)</label>
+                                <input type="number" id="principal" placeholder="Starting amount">
+                            </div>
+                            <div class="form-group">
+                                <label>Monthly Contribution (₹)</label>
+                                <input type="number" id="monthly" placeholder="Monthly investment">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group">
+                                <label>Annual Interest Rate (%)</label>
+                                <input type="number" id="rate" step="0.1" placeholder="Expected return rate">
+                            </div>
+                            <div class="form-group">
+                                <label>Investment Period (Years)</label>
+                                <input type="number" id="years" placeholder="Years to invest">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn" onclick="calculateInvestment()">Calculate Growth</button>
+                    <div id="investmentResult"></div>
+                </div>
+            </div>
+
+            <!-- Loan Calculator Tab -->
+            <div id="loan" class="tab-content">
+                <div class="card">
+                    <h3>🏠 Loan Payment Calculator</h3>
+                    <div class="grid">
+                        <div>
+                            <div class="form-group">
+                                <label>Loan Amount (₹)</label>
+                                <input type="number" id="loanAmount" placeholder="Total loan amount">
+                            </div>
+                            <div class="form-group">
+                                <label>Annual Interest Rate (%)</label>
+                                <input type="number" id="loanRate" step="0.01" placeholder="Interest rate">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group">
+                                <label>Loan Term (Years)</label>
+                                <input type="number" id="loanTerm" placeholder="Loan duration">
+                            </div>
+                            <div class="form-group">
+                                <label>Loan Type</label>
+                                <select id="loanType">
+                                    <option value="mortgage">Mortgage</option>
+                                    <option value="auto">Auto Loan</option>
+                                    <option value="personal">Personal Loan</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn" onclick="calculateLoan()">Calculate Payment</button>
+                    <div id="loanResult"></div>
+                </div>
+            </div>
+
+            <!-- AI Advisor Chat Tab -->
+            <div id="advisor" class="tab-content">
+                <div class="card">
+                    <h3>🤖 AI Financial Advisor Chat</h3>
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message ai-message">
+                                <strong>AI Advisor:</strong> Hello! I'm your AI Financial Advisor. Ask me anything about budgeting, investing, saving, debt management, or financial planning. How can I help you today?
+                            </div>
+                        </div>
+                        <div class="chat-input">
+                            <input type="text" id="chatInput" placeholder="Ask me about your finances..." onkeypress="handleChatEnter(event)">
+                            <button onclick="sendMessage()">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn" id="logoutButton" style="margin-top: 20px; background: linear-gradient(135deg, #dc3545 0%, #b22222 100%);">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Login/Logout Functionality ---
+        const authWrapper = document.getElementById('authWrapper');
+        const loginCard = document.getElementById('loginCard');
+        const registerCard = document.getElementById('registerCard');
+        const mainAppContent = document.getElementById('mainAppContent');
+
+        const loginButton = document.getElementById('loginButton');
+        const logoutButton = document.getElementById('logoutButton');
+        const registerButton = document.getElementById('registerButton');
+        const showRegisterLink = document.getElementById('showRegister');
+        const showLoginLink = document.getElementById('showLogin');
+
+        const loginUsernameInput = document.getElementById('loginUsername');
+        const loginPasswordInput = document.getElementById('loginPassword');
+        const loginMessage = document.getElementById('loginMessage');
+
+        const registerUsernameInput = document.getElementById('registerUsername');
+        const registerPasswordInput = document.getElementById('registerPassword');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const registerMessage = document.getElementById('registerMessage');
+
+        // Retrieve or initialize registered users from localStorage
+        // For demonstration, username 'user' and password 'password' will be the default.
+        // In a real app, this would be a backend database.
+        let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || [
+            { username: 'user', password: 'password' }
+        ];
+
+        // Function to save the current state of registeredUsers to localStorage
+        function saveUsers() {
+            try {
+                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+            } catch (e) {
+                console.error("Error saving to localStorage:", e);
+                alert("Could not save user data. Local storage might be full or disabled.");
+            }
+        }
+
+        // --- UI Display Functions ---
+        function showLoginPage() {
+            authWrapper.style.display = 'flex';
+            loginCard.style.display = 'block';
+            registerCard.style.display = 'none';
+            mainAppContent.style.display = 'none';
+            document.body.classList.remove('app-active');
+            clearAuthMessages();
+            clearAuthInputs();
+        }
+
+        function showRegisterPage() {
+            authWrapper.style.display = 'flex';
+            loginCard.style.display = 'none';
+            registerCard.style.display = 'block';
+            mainAppContent.style.display = 'none';
+            document.body.classList.remove('app-active');
+            clearAuthMessages();
+            clearAuthInputs();
+        }
+
+        function showAppContent() {
+            authWrapper.style.display = 'none';
+            mainAppContent.style.display = 'block';
+            document.body.classList.add('app-active');
+            // Re-initialize the active tab to ensure correct display after login
+            const firstNavTab = document.querySelector('.nav-tab');
+            if (firstNavTab) {
+                showTab('budget', firstNavTab); // Default to budget tab
+            }
+        }
+
+        // Helper to clear messages and their styles
+        function clearAuthMessages() {
+            loginMessage.textContent = '';
+            loginMessage.className = 'message-area';
+            registerMessage.textContent = '';
+            registerMessage.className = 'message-area';
+        }
+
+        // Helper to clear input fields
+        function clearAuthInputs() {
+            loginUsernameInput.value = '';
+            loginPasswordInput.value = '';
+            registerUsernameInput.value = '';
+            registerPasswordInput.value = '';
+            confirmPasswordInput.value = '';
+        }
+
+        // --- Authentication & Registration Logic ---
+
+        // Simulated backend authentication check
+        function authenticateUser(username, password) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    const user = registeredUsers.find(u => u.username === username && u.password === password);
+                    if (user) {
+                        resolve({ success: true, message: 'Login successful!' });
+                    } else {
+                        reject({ success: false, message: 'Invalid username or password.' });
+                    }
+                }, 1000); // Simulate network delay
+            });
+        }
+
+        // Simulated backend registration
+        function registerNewUser(username, password) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    if (username.length < 3) {
+                        return reject({ success: false, message: 'Username must be at least 3 characters long.' });
+                    }
+                    if (password.length < 6) {
+                        return reject({ success: false, message: 'Password must be at least 6 characters long.' });
+                    }
+                    if (registeredUsers.some(u => u.username === username)) {
+                        return reject({ success: false, message: 'Username already exists. Please choose another.' });
+                    }
+                    
+                    registeredUsers.push({ username: username, password: password });
+                    saveUsers(); // Persist to localStorage
+                    resolve({ success: true, message: 'Registration successful! You can now log in.' });
+                }, 1500); // Simulate network delay
+            });
+        }
+
+        // --- Event Listeners ---
+
+        // Login Button Click
+        loginButton.addEventListener('click', async () => {
+            const username = loginUsernameInput.value.trim();
+            const password = loginPasswordInput.value.trim();
+
+            if (!username || !password) {
+                loginMessage.textContent = 'Please enter both username and password.';
+                loginMessage.className = 'message-area error-message';
+                return;
+            }
+
+            loginMessage.textContent = 'Logging in...';
+            loginMessage.className = 'message-area info-message';
+
+            try {
+                const result = await authenticateUser(username, password);
+                if (result.success) {
+                    loginMessage.textContent = result.message;
+                    loginMessage.className = 'message-area success-message';
+                    localStorage.setItem('isLoggedIn', 'true');
+                    setTimeout(() => {
+                        showAppContent();
+                    }, 500); // Short delay before redirecting to app
+                } else {
+                    loginMessage.textContent = result.message;
+                    loginMessage.className = 'message-area error-message';
+                }
+            } catch (error) {
+                loginMessage.textContent = error.message || 'An unexpected error occurred during login.';
+                loginMessage.className = 'message-area error-message';
+            }
+        });
+
+        // Register Button Click
+        registerButton.addEventListener('click', async () => {
+            const username = registerUsernameInput.value.trim();
+            const password = registerPasswordInput.value.trim();
+            const confirmPassword = confirmPasswordInput.value.trim();
+
+            if (!username || !password || !confirmPassword) {
+                registerMessage.textContent = 'Please fill in all fields.';
+                registerMessage.className = 'message-area error-message';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                registerMessage.textContent = 'Passwords do not match.';
+                registerMessage.className = 'message-area error-message';
+                return;
+            }
+
+            registerMessage.textContent = 'Registering...';
+            registerMessage.className = 'message-area info-message';
+
+            try {
+                const result = await registerNewUser(username, password);
+                if (result.success) {
+                    registerMessage.textContent = result.message;
+                    registerMessage.className = 'message-area success-message';
+                    setTimeout(() => {
+                        showLoginPage(); // Redirect to login page after successful registration
+                        loginUsernameInput.value = username; // Pre-fill login username
+                        loginMessage.textContent = 'Registration successful! Please log in with your new account.';
+                        loginMessage.className = 'message-area info-message'; // Info message on login page
+                    }, 1000); // Give time for success message to be read
+                } else {
+                    registerMessage.textContent = result.message;
+                    registerMessage.className = 'message-area error-message';
+                }
+            } catch (error) {
+                registerMessage.textContent = error.message || 'An unexpected error occurred during registration.';
+                registerMessage.className = 'message-area error-message';
+            }
+        });
+
+        // Logout Button Click
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('isLoggedIn');
+            showLoginPage();
+        });
+
+        // Switch to Register Form
+        showRegisterLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showRegisterPage();
+        });
+
+        // Switch to Login Form
+        showLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showLoginPage();
+        });
+
+        // --- Existing App Functionality (modified showTab) ---
+        function showTab(tabName, clickedElement) {
+            // Hide all tab contents
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active class from all nav tabs
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab and activate nav
+            document.getElementById(tabName).classList.add('active');
+            if (clickedElement) {
+                clickedElement.classList.add('active');
+            }
+        }
+
+        function calculateBudget() {
+            const income = parseFloat(document.getElementById('income').value) || 0;
+            const housing = parseFloat(document.getElementById('housing').value) || 0;
+            const food = parseFloat(document.getElementById('food').value) || 0;
+            const transport = parseFloat(document.getElementById('transport').value) || 0;
+            const utilities = parseFloat(document.getElementById('utilities').value) || 0;
+            const entertainment = parseFloat(document.getElementById('entertainment').value) || 0;
+            const other = parseFloat(document.getElementById('other').value) || 0;
+
+            const totalExpenses = housing + food + transport + utilities + entertainment + other;
+            const remaining = income - totalExpenses;
+            const savingsRate = income > 0 ? (remaining / income * 100) : 0;
+
+            let advice = '';
+            let adviceColor = '';
+            
+            if (savingsRate >= 20) {
+                advice = 'Excellent! You\'re saving over 20% of your income. Consider increasing investments.';
+                adviceColor = '#28a745';
+            } else if (savingsRate >= 10) {
+                advice = 'Good savings rate! Try to optimize expenses to save even more.';
+                adviceColor = '#ffc107';
+            } else if (savingsRate >= 0) {
+                advice = 'You need to reduce expenses or increase income to save more.';
+                adviceColor = '#fd7e14';
+            } else {
+                advice = 'Warning: You\'re spending more than you earn! Immediate budget revision needed.';
+                adviceColor = '#dc3545';
+            }
+
+            document.getElementById('budgetResult').innerHTML = `
+                <div class="result">
+                    <div class="grid">
+                        <div class="metric">
+                            <h4>₹${totalExpenses.toFixed(2)}</h4>
+                            <p>Total Expenses</p>
+                        </div>
+                        <div class="metric">
+                            <h4>₹${remaining.toFixed(2)}</h4>
+                            <p>Remaining</p>
+                        </div>
+                        <div class="metric">
+                            <h4>${savingsRate.toFixed(1)}%</h4>
+                            <p>Savings Rate</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="advice-box" style="background: ${adviceColor};">
+                    <h4>💡 AI Recommendation</h4>
+                    <p>${advice}</p>
+                </div>
+            `;
+        }
+
+        function calculateInvestment() {
+            const principal = parseFloat(document.getElementById('principal').value) || 0;
+            const monthly = parseFloat(document.getElementById('monthly').value) || 0;
+            const rate = parseFloat(document.getElementById('rate').value) / 100 || 0;
+            const years = parseFloat(document.getElementById('years').value) || 0;
+
+            const monthlyRate = rate / 12;
+            const totalMonths = years * 12;
+            
+            // Future value of initial investment
+            const futureValuePrincipal = principal * Math.pow(1 + monthlyRate, totalMonths);
+            
+            // Future value of monthly contributions
+            const futureValueMonthly = monthly * (Math.pow(1 + monthlyRate, totalMonths) - 1) / monthlyRate;
+            
+            const totalValue = futureValuePrincipal + futureValueMonthly;
+            const totalInvested = principal + (monthly * totalMonths);
+            const totalGains = totalValue - totalInvested;
+
+            let advice = '';
+            if (rate >= 10) {
+                advice = 'High return expectation! Consider diversifying with lower-risk investments too.';
+            } else if (rate >= 7) {
+                advice = 'Realistic return expectation. This aligns with historical stock market averages.';
+            } else {
+                advice = 'Conservative approach. Consider some higher-growth investments for better returns.';
+            }
+
+            document.getElementById('investmentResult').innerHTML = `
+                <div class="result">
+                    <div class="grid">
+                        <div class="metric">
+                            <h4>₹${totalInvested.toFixed(2)}</h4>
+                            <p>Total Invested</p>
+                        </div>
+                        <div class="metric">
+                            <h4>₹${totalGains.toFixed(2)}</h4>
+                            <p>Investment Gains</p>
+                        </div>
+                        <div class="metric">
+                            <h4>₹${totalValue.toFixed(2)}</h4>
+                            <p>Final Value</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="advice-box">
+                    <h4>💡 AI Investment Advice</h4>
+                    <p>${advice}</p>
+                    <p><strong>Tip:</strong> Start investing early and consistently. Time and compound interest are your best friends!</p>
+                </div>
+            `;
+        }
+
+        function calculateLoan() {
+            const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
+            const rate = parseFloat(document.getElementById('loanRate').value) / 100 / 12 || 0;
+            const term = parseFloat(document.getElementById('loanTerm').value) * 12 || 0;
+            const type = document.getElementById('loanType').value; // Loan type is not used in calculation but can be for specific advice
+
+            if (amount <= 0 || rate <= 0 || term <= 0) {
+                alert('Please enter valid loan details');
+                return;
+            }
+
+            // Loan payment formula: M = P [ i(1 + i)^n ] / [ (1 + i)^n – 1]
+            // M = monthly payment
+            // P = principal loan amount
+            // i = monthly interest rate (annual rate / 12)
+            // n = total number of payments (loan term in years * 12)
+            const monthlyPayment = (amount * rate * Math.pow(1 + rate, term)) / (Math.pow(1 + rate, term) - 1);
+            const totalPayment = monthlyPayment * term;
+            const totalInterest = totalPayment - amount;
+
+            let advice = '';
+            const interestRatio = totalInterest / amount;
+            
+            if (interestRatio > 0.5) {
+                advice = 'High interest cost! Consider paying extra principal or refinancing options.';
+            } else if (interestRatio > 0.2) {
+                advice = 'Moderate interest cost. Consider making extra payments to save on interest.';
+            } else {
+                advice = 'Good loan terms! This is a manageable debt level.';
+            }
+
+            document.getElementById('loanResult').innerHTML = `
+                <div class="result">
+                    <div class="grid">
+                        <div class="metric">
+                            <h4>₹${monthlyPayment.toFixed(2)}</h4>
+                            <p>Monthly Payment</p>
+                        </div>
+                        <div class="metric">
+                            <h4>₹${totalInterest.toFixed(2)}</h4>
+                            <p>Total Interest</p>
+                        </div>
+                        <div class="metric">
+                            <h4>₹${totalPayment.toFixed(2)}</h4>
+                            <p>Total Payment</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="advice-box">
+                    <h4>💡 AI Loan Advice</h4>
+                    <p>${advice}</p>
+                    <p><strong>Tip:</strong> Extra payments toward principal can save thousands in interest!</p>
+                </div>
+            `;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Generate AI response
+            setTimeout(() => {
+                const response = generateAIResponse(message);
+                addMessage(response, 'ai');
+            }, 1000);
+        }
+
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender === 'user' ? 'user-message' : 'ai-message'}`;
+            
+            if (sender === 'ai') {
+                messageDiv.innerHTML = `<strong>AI Advisor:</strong> ${text}`;
+            } else {
+                messageDiv.innerHTML = `<strong>You:</strong> ${text}`;
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function generateAIResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+            
+            // Budget-related responses
+            if (message.includes('budget') || message.includes('expense') || message.includes('spend')) {
+                return "For effective budgeting, try the 50/30/20 rule: 50% for needs, 30% for wants, and 20% for savings. Track your expenses for a month to see where your money goes. Use the Budget Planner tab to analyze your current spending!";
+            }
+            
+            // Investment responses
+            if (message.includes('invest') || message.includes('stock') || message.includes('portfolio') || message.includes('mutual fund')) {
+                return "Start with low-cost index funds for diversification. Dollar-cost averaging helps reduce risk. Consider your age: subtract your age from 100 to determine stock allocation percentage. Always invest for the long term and never invest money you'll need within 5 years.";
+            }
+            
+            // Debt responses
+            if (message.includes('debt') || message.includes('loan') || message.includes('credit card') || message.includes('mortgage')) {
+                return "Focus on high-interest debt first (avalanche method) or smallest balances (snowball method). Pay more than minimums when possible. Consider debt consolidation if it lowers your overall interest rate. Avoid taking on new debt while paying off existing debt.";
+            }
+            
+            // Savings responses
+            if (message.includes('save') || message.includes('emergency fund') || message.includes('savings account')) {
+                return "Build an emergency fund of 3-6 months of expenses first. Automate your savings - pay yourself first! Use high-yield savings accounts for emergency funds. For goals beyond 1 year, consider investing instead of just saving.";
+            }
+            
+            // Retirement responses
+            if (message.includes('retirement') || message.includes('401k') || message.includes('ira') || message.includes('pension')) {
+                return "Start early! Contribute enough to get full employer 401(k) match - it's free money. Consider Roth IRA for tax-free withdrawals in retirement. Aim to save 10-15% of income for retirement. Take advantage of catch-up contributions if you're over 50.";
+            }
+            
+            // Credit score responses
+            if (message.includes('credit score') || message.includes('credit report')) {
+                return "Pay bills on time (35% of score), keep credit utilization below 30% (30% of score), maintain old accounts for credit history length (15%), limit new credit inquiries (10%), and have a mix of credit types (10%). Check your credit report annually for free.";
+            }
+
+            // Greetings / General help
+            if (message.includes('hello') || message.includes('hi') || message.includes('hey')) {
+                return "Hello! How can I assist you with your financial journey today?";
+            }
+            if (message.includes('how are you')) {
+                return "As an AI, I don't have feelings, but I'm ready to help you with your finances!";
+            }
+            
+            // Default response
+            const responses = [
+                "That's a great financial question! Here are some key principles: spend less than you earn, invest early and consistently, build an emergency fund, and educate yourself about personal finance. What specific area would you like to focus on?",
+                "Financial success comes from good habits: budgeting, saving automatically, investing for the long term, and avoiding high-interest debt. Which of these areas would you like to improve first?",
+                "Smart financial planning involves setting clear goals, creating a budget, building emergency savings, and investing wisely. What's your biggest financial challenge right now?",
+                "Remember the basics: emergency fund first, then pay off high-interest debt, contribute to retirement accounts, and invest in diversified portfolios. What aspect of your finances needs the most attention?",
+                "I'm here to help with your financial questions. Could you please elaborate or ask a specific question about budgeting, investing, saving, or debt?"
+            ];
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function handleChatEnter(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('isLoggedIn') === 'true') {
+                showAppContent();
+            } else {
+                showLoginPage();
+            }
+        });
+    </script>
+</body>
+</html>
